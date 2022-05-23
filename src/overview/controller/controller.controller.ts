@@ -1,8 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Controller, Get, Header, HttpCode, Param, Post, Query, Redirect, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, HttpException, HttpStatus, Param, Post, Query, Redirect, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { ControllerOutput } from './controller.dto';
+import { ControllerDto, ControllerOutput } from './controller.dto';
 import { ControllerService } from './controller.service';
+import * as bcrypt from 'bcryptjs';
 
 @Controller('controller')
 export class ControllerController {
@@ -52,7 +53,7 @@ export class ControllerController {
     return { message: 'This route post with custom status code 202' };
   }
 
-  /** 
+  /**
   # Response Headers
   **/
   @Post('headers')
@@ -61,7 +62,7 @@ export class ControllerController {
     return { message: 'This action post headers' };
   }
 
-  /** 
+  /**
   Redirection
 
   ## Redirect to a specific route with a specific status code
@@ -79,12 +80,37 @@ export class ControllerController {
     if (google === 'true') return { url: 'https://google.com' };
   }
 
-  /** 
-  # Asynchronicity
+  /**
+  # Asynchronous
   **/
   @Get('async')
-  async getAsync(@Res() res: Response) {
-    const users = await this.controllerService.getUsers().toPromise();
-    res.json({ message: 'This action returns get controller async', users: users.data });
+  async getAsync() {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash('PASSWORD', salt);
+    return { message: 'This action returns get controller async', hash };
+  }
+
+  /**
+  # Request Payloads
+
+  - Request Payloads can work with x-www-form-urlencoded, json, text, raw, or any other type of data.
+  **/
+  @Post('request-payload')
+  getRequestPayload(@Body() body: ControllerDto) {
+    return body;
+  }
+
+  /**
+  # Exception
+  **/
+  @Get('exception')
+  async getException(@Body() body: ControllerDto) {
+    throw new HttpException(
+      {
+        status: HttpStatus.FORBIDDEN,
+        error: 'This is a custom message',
+      },
+      HttpStatus.FORBIDDEN,
+    );
   }
 }
