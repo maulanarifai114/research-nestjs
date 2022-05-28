@@ -4,10 +4,19 @@ import { AppService } from './app.service';
 import { GlobalModule } from './module/global/global.module';
 import { UserModule } from './controller/user/user.module';
 import { ManyModuleModule } from './module/many-module/many-module.module';
-import { DynamiccModule } from './module/dynamic/dynamic.module';
+import { DynamicConfigModule } from './module/dynamic-config/dynamic-config.module';
 
 @Module({
-  imports: [GlobalModule, UserModule, ManyModuleModule, DynamiccModule],
+  imports: [
+    GlobalModule,
+    UserModule,
+    ManyModuleModule,
+    DynamicConfigModule.forRoot({
+      ext: 'ext string',
+      folder: 'folder string',
+      file: 'file string',
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
